@@ -10,7 +10,7 @@ public class GreetingController {
 
     private final GreetingService greetingService;
 
-    public GreetingController(@Qualifier("simpleGreetingService") GreetingService greetingService) {
+    public GreetingController(@Qualifier("advancedGreetingService") GreetingService greetingService) {
         this.greetingService = greetingService;
     }
 
