@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
-public class EventTicketingApiApplication {
+public class    EventTicketingApiApplication {
 
      static void main(String[] args) {
         SpringApplication.run(EventTicketingApiApplication.class, args);
