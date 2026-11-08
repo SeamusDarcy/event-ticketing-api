@@ -10,3 +10,8 @@
 - ConfigurationProperties reads a group of related settings that share a prefix in yml into one record 
 - Value can be used for quick Standalone settings 
 - ConfigurationProperties used for multiple settings together 
+
+## What happens between running main() and tomcat accepting requests
+- main() calls SpringApplication.run which creates the container (place to store beans) and scans for beans and applies auto config
+- Spring then creates and wires every bean and runs their @PostConstructor methods 
+- Then TomCat starts accepting requests
