@@ -18,5 +18,4 @@ public class EventTicketingApiApplication {
          SpringApplication.run(EventTicketingApiApplication.class, args);
          log.info("main: after SpringApplication.run");
     }
-
 }
