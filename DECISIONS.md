@@ -40,6 +40,14 @@
 
 ## Stage 2: Basic REST API for Events
 
+## API Basics
+- RequestMapping at class level used as a shortcut for all Mapping methods in class as they build on from the initial RequestMapping
+- Every Mapping method in Controller returns Http status 200 by default
+- @RequestBody tells Spring to read the JSON in request body and convert it into the parameters type e.g. request record
+- @Valid placed before @RequestBody parameter, it makes Spring check the records constraint (@NotNull) annotation before method runs, failure produces a 400 error and method never called
+- Create in EventController returns a ResponseEntity<EventResponse> which is the staus code (201), the headers (location) and the body (eventResponse). to create the ResponseEntity we create a URI with the location path of new created event
+- 
+
 ### Instant vs LocalDateTime
 - for the Event object the time will be an Instant instead of a LocalDateTime
 - LocalDateTime has no timezone attached, so one 7:30pm could be different from another 7:30pm
@@ -54,3 +62,8 @@
 - findById in repository return Optional<Event> so no unexpected null returns 
 - findAll returns copy of maps values sorted via steam
 - deleteById uses the result of remove instead of checking first so its one atomic step 
+
+## @RequestParam vs @PathVariable
+- both used inside the method parameters 
+- PathVariable is used when the parameter is part of the path, the resource you mean 
+- RequestParam is for anything after the ? in url for extra stuff like filters 
