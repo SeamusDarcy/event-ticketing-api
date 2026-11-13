@@ -46,7 +46,7 @@
 - @RequestBody tells Spring to read the JSON in request body and convert it into the parameters type e.g. request record
 - @Valid placed before @RequestBody parameter, it makes Spring check the records constraint (@NotNull) annotation before method runs, failure produces a 400 error and method never called
 - Create in EventController returns a ResponseEntity<EventResponse> which is the staus code (201), the headers (location) and the body (eventResponse). to create the ResponseEntity we create a URI with the location path of new created event
-- 
+
 
 ### Instant vs LocalDateTime
 - for the Event object the time will be an Instant instead of a LocalDateTime
@@ -67,3 +67,10 @@
 - both used inside the method parameters 
 - PathVariable is used when the parameter is part of the path, the resource you mean 
 - RequestParam is for anything after the ? in url for extra stuff like filters 
+
+## ApiExceptionHandler
+- ApiExceptionHandler in common package is used by spring as a global catch for all controllers
+- it's marked with @RestControllerAdvice
+- When EventService throws EventNotFoundException, it travels up through controller since nothing catchs it there
+- Spring see's it and find method with @ExceptionHander(EventNotFoundException.class)
+- that method builds a ProblemDetail with a 404 status and the exception message and spring sends it back as json 
