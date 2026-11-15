@@ -74,3 +74,8 @@
 - When EventService throws EventNotFoundException, it travels up through controller since nothing catchs it there
 - Spring see's it and find method with @ExceptionHander(EventNotFoundException.class)
 - that method builds a ProblemDetail with a 404 status and the exception message and spring sends it back as json 
+
+## Http Errors 
+- setProperty() can be used to assign an additional named field to a problemDetail (error response) to the JSON body
+- BindingResult is the object that holds the outcome of validating the request, it contains one fieldError for each failed field
+- FieldError is one field, and it shows this field failed and why 
