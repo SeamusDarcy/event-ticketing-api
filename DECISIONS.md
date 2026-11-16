@@ -85,6 +85,8 @@
 - setProperty() can be used to assign an additional named field to a problemDetail (error response) to the JSON body
 - BindingResult is the object that holds the outcome of validating the request, it contains one fieldError for each failed field
 - FieldError is one field, and it shows this field failed and why 
+- used a record for storing FieldValidationErrors with String for field and message as record is safer than a map here
+- for 400 Bad Request response used custom small String for response since Spring default is long and technical 
 
 ## HttpMessageNotReadableException 
 - during testing message not readable exception was returning before custom methodArgumentsNotValidException 
