@@ -75,7 +75,14 @@
 - Spring see's it and find method with @ExceptionHander(EventNotFoundException.class)
 - that method builds a ProblemDetail with a 404 status and the exception message and spring sends it back as json 
 
+## ProblemDetail
+- java object that represents an error response 
+- when you return it from an @ExceptionHandler, Spring turns it into the JSON body and sets the HTTP status for it 
+- its fields are Status (HTTP code), title (name for prob type), detail (readable explanation), instance (the request path that caused it), type (a URI identifying the kind of problem), extra Properties (any additional named fields you add with setProperty)
+- setProperty takes two fields, name of the JSON field and the value to put there
+
 ## Http Errors 
 - setProperty() can be used to assign an additional named field to a problemDetail (error response) to the JSON body
 - BindingResult is the object that holds the outcome of validating the request, it contains one fieldError for each failed field
 - FieldError is one field, and it shows this field failed and why 
+
