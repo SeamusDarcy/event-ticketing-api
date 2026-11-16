@@ -4,9 +4,14 @@ import com.seamus.eventticketingapi.event.EventNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -18,7 +23,14 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleNotValid(MethodArgumentNotValidException ex){
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
+        BindingResult result = ex.getBindingResult();
+        List<FieldError> fieldErrors = result.getFieldErrors();
+        List<FieldValidationError> fieldValidationErrors = fieldErrors.stream()
+                .map(fieldError -> new FieldValidationError(fieldError.getField(), fieldError.getDefaultMessage()))
+                .toList();
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
+        problemDetail.setProperty("errors", fieldValidationErrors);
+        return problemDetail;
     }
 
 }
