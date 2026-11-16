@@ -86,3 +86,8 @@
 - BindingResult is the object that holds the outcome of validating the request, it contains one fieldError for each failed field
 - FieldError is one field, and it shows this field failed and why 
 
+## HttpMessageNotReadableException 
+- during testing message not readable exception was returning before custom methodArgumentsNotValidException 
+- added a new case to handle messageNotReadable to avoid unreadable errors
+- added a log.warn to notReadable to have a log of what went wrong 
+
