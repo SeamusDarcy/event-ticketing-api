@@ -73,7 +73,7 @@
 - it's marked with @RestControllerAdvice
 - When EventService throws EventNotFoundException, it travels up through controller since nothing catchs it there
 - Spring see's it and find method with @ExceptionHander(EventNotFoundException.class)
-- that method builds a ProblemDetail with a 404 status and the exception message and spring sends it back as json 
+- for the EventNotFoundException we create our own custom exception since it happens at the service layer it shouldnt know about any HTTP status codes so we put it in custom terms and later turn its into a 404 with apiExceptionHandler
 
 ## ProblemDetail
 - java object that represents an error response 
@@ -87,6 +87,7 @@
 - FieldError is one field, and it shows this field failed and why 
 - used a record for storing FieldValidationErrors with String for field and message as record is safer than a map here
 - for 400 Bad Request response used custom small String for response since Spring default is long and technical 
+- Jackson converts the JSON in request to our java objects 
 
 ## HttpMessageNotReadableException 
 - during testing message not readable exception was returning before custom methodArgumentsNotValidException 
