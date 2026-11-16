@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @RestControllerAdvice
@@ -27,6 +28,7 @@ public class ApiExceptionHandler {
         List<FieldError> fieldErrors = result.getFieldErrors();
         List<FieldValidationError> fieldValidationErrors = fieldErrors.stream()
                 .map(fieldError -> new FieldValidationError(fieldError.getField(), fieldError.getDefaultMessage()))
+                .sorted(Comparator.comparing(FieldValidationError::field))
                 .toList();
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
         problemDetail.setProperty("errors", fieldValidationErrors);
