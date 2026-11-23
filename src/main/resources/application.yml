@@ -1,6 +1,9 @@
 spring:
-  application:
-    name: event-ticketing-api
-
-greeting:
-  prefix: Hello
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tixdub
+    username: ${DB_USER:tixdub}
+    password: ${DB_PASSWORD:tixdub}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false

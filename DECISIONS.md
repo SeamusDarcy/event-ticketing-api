@@ -113,6 +113,7 @@
 ## Hibernate 
 - lets java code talk to database without writing SQL by hand
 - when you run save(object) Hibernate turns into into INSERT and turns SELECT results back into java object 
+- In the venues class we make ID Long object type since it can be null, but latitude is double primitive type since it can never be null
 
 ## Flyway 
 - tool that builds and changes the DB's tables. 
@@ -121,6 +122,7 @@
 - Each version is only ever ran once and on each new start it checks all existing file version and if they have been done it assumes the database was build off this 
 - for this reason it is very important to never edit files once they have been run once 
 - any files that it see that have not been ran yet it will run now in order 
+- Basic rule : each logical change gets it own migration. never edit one after it has run anywhere 
 
 ## Spring Data JPA
 - Spring library that writes your repository code for you 
@@ -130,6 +132,9 @@
 ## JPA
 - Set of rules for how java code save and loads objects in a database 
 - It defines the annotations like @Entity, @Id, @ManyToOne
+- @GeneratedValue(strategy = GenerationType.IDENTITY) : tells JPA that db will make the value. 
+- for Entity tables use Protected constructor, it can only be called by subclasses and classes in same package and not made accidental
+- We make a second construor non protected for our services to call to create venues, events etc.
 
 ## Data Flow 
 - Service -> Repository (Spring Data JPA) -> Hibernate (JPA) -> HikariCP (Connection pool + Postgres Drivers) -> Popstgres
@@ -151,4 +156,16 @@
 - Be default it is true which allows lazy loading so Hibernate only get the exact data you request no related data at all 
 - true : lazyloading on so queries are hidden which is convent but allows queries you didnt write to run in controller layer 
 - false : session closes when service method ends so lazy data must be read inside the service or fetched upfront and controllers only get the DTO's 
+
+## Postgres
+- GENERATED ALWAYS AS IDENTITY : makes Postgres give ids in increasing order by itself 
+- DOUBLE PRECISION : decimal number with 15 digits of accuracy can be used for map location 
+- btree : an index that lets Postgres look up values in a row wihtout going through the whole table 
+- TIMESTAMPTZ : stores one exact moment in time (Postgres uses UTC internally) which startsAt already uses, avoid using plain TIMESTAMP which stores clock reading with no timezones 
+
+## psql
+- start with "docker compose exec postgres psql -U tixdub -d tixdub"
+- \dt : lists the tables in db 
+- \d events : describes one table, columns, types, rules indexes, fk 
+
 
