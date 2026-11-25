@@ -9,10 +9,10 @@ import java.util.List;
 
 @Service
 public class EventService {
-    private final InMemoryEventRepository inMemoryEventRepository;
+    private final EventRepository eventRepository;
 
-    public EventService(InMemoryEventRepository inMemoryEventRepository) {
-        this.inMemoryEventRepository = inMemoryEventRepository;
+    public EventService(EventRepository eventRepository) {
+        this.eventRepository = eventRepository;
     }
 
     public EventResponse create(CreateEventRequest createEventRequest) {
@@ -24,23 +24,23 @@ public class EventService {
                 createEventRequest.capacity(),
                 createEventRequest.priceCents());
 
-        return eventToResponse(inMemoryEventRepository.save(event));
+        return eventToResponse(eventRepository.save(event));
     }
 
     public EventResponse getById(Long id) {
-        Event event = inMemoryEventRepository.findById(id)
+        Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(id));
         return eventToResponse(event);
     }
 
     public List<EventResponse> getAll() {
-        return inMemoryEventRepository.findAll().stream()
+        return eventRepository.findAll().stream()
                 .map(this::eventToResponse)
                 .toList();
     }
 
     public EventResponse update(Long id, CreateEventRequest createEventRequest) {
-        inMemoryEventRepository.findById(id).orElseThrow(() -> new EventNotFoundException(id)); //check event exists if not throw
+        eventRepository.findById(id).orElseThrow(() -> new EventNotFoundException(id)); //check event exists if not throw
         Event updatedEvent = new Event(
                 id,
                 createEventRequest.name(),
@@ -48,14 +48,15 @@ public class EventService {
                 createEventRequest.startsAt(),
                 createEventRequest.capacity(),
                 createEventRequest.priceCents());
-        inMemoryEventRepository.save(updatedEvent);
+        eventRepository.save(updatedEvent);
         return eventToResponse(updatedEvent);
     }
 
     public void deleteById(Long id) {
-        if (!inMemoryEventRepository.deleteById(id)) {
+        if (!eventRepository.existsById(id)) {
             throw new EventNotFoundException(id);
         }
+        eventRepository.deleteById(id);
     }
 
     private EventResponse eventToResponse(Event event) {

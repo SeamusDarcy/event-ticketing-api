@@ -114,6 +114,14 @@
 - lets java code talk to database without writing SQL by hand
 - when you run save(object) Hibernate turns into into INSERT and turns SELECT results back into java object 
 - In the venues class we make ID Long object type since it can be null, but latitude is double primitive type since it can never be null
+- @Entity : put on any class that maps to a db table 
+- @Table : on each class that is a table and then put (name = "name of table in db")
+- @ID is how Hibernate knows this is a primary key 
+- @Column(nullable = false) : means this is a column in db and it cant be null
+- @ManyToOne : tells Hibernate that many Event rows can point to a single venue when put on Event column 
+- fetch = FetchType.LAZY : controls when the object is loaded, when put on venue column of events Lazy means that loading an event does not load its venue. Hibernate puts a stand in there and only runs venue query when the code actually uses it
+- optional = false : goes in @manyToOne brackets, in Event it means that each event must have a venue 
+- @JoinColumn(name = "venue_id") : names the column in events table that stores the link. Hibernate uses it to turn Venue object into a number when saving and back into a venue when loading 
 
 ## Flyway 
 - tool that builds and changes the DB's tables. 
@@ -157,6 +165,12 @@
 - true : lazyloading on so queries are hidden which is convent but allows queries you didnt write to run in controller layer 
 - false : session closes when service method ends so lazy data must be read inside the service or fetched upfront and controllers only get the DTO's 
 
+## @ManyToOne and @JoinColumn: Linking Events to Venues
+- When its calls eventRepository.save(event), Hibernate looks at Event class and sees the venue field
+- from this it knows that the fields type is Venue and Venue has exactly one field marked @Id and @JoinColumn(name = "venue_id") says where to put the number
+- It reads the id field from venue object it got and uses that number for venue_id column 
+- To load and even it does this in reverse 
+
 ## Postgres
 - GENERATED ALWAYS AS IDENTITY : makes Postgres give ids in increasing order by itself 
 - DOUBLE PRECISION : decimal number with 15 digits of accuracy can be used for map location 
@@ -167,5 +181,14 @@
 - start with "docker compose exec postgres psql -U tixdub -d tixdub"
 - \dt : lists the tables in db 
 - \d events : describes one table, columns, types, rules indexes, fk 
+
+## EventRepository
+- It extends JpaRepository<Event, Long>, Event -> type of object repo will deal with, Long -> Type of the ID (PK) of the object 
+- by extending JpaRepo it already has alot of methods like save, findById, findAll, deleteById, etc. 
+
+## Bean Validation
+- @NotNull : Must not be null. Empty or Blank text still passes, used for numbers, dates, ID's and objects
+- @NotEmpty : Must not be null or empty. Spaces still pass. used for lists, sets, maps, arrays
+- @NotBank : Must not be null, empty or whitespace only. String only used on user typed text like names or titles 
 
 
