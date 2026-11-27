@@ -5,8 +5,9 @@ import java.time.Instant;
 public record EventResponse(
         Long id,
         String name,
-        String venueName,
+        Long venueId,
         Instant startsAt,
         Integer capacity,
-        long priceCents) {
+        Integer remaining,
+        Long priceCents) {
 }

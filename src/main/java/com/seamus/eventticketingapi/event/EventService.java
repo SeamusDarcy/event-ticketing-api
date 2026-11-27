@@ -2,6 +2,10 @@ package com.seamus.eventticketingapi.event;
 
 import com.seamus.eventticketingapi.event.dto.CreateEventRequest;
 import com.seamus.eventticketingapi.event.dto.EventResponse;
+import com.seamus.eventticketingapi.venue.VenueNotFoundException;
+import com.seamus.eventticketingapi.venue.VenueRepository;
+import com.seamus.eventticketingapi.venue.VenueService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,62 +13,68 @@ import java.util.List;
 
 @Service
 public class EventService {
-    private final InMemoryEventRepository inMemoryEventRepository;
+    private final EventRepository eventRepository;
+    private final VenueService venueService;
+    private final VenueRepository venueRepository;
 
-    public EventService(InMemoryEventRepository inMemoryEventRepository) {
-        this.inMemoryEventRepository = inMemoryEventRepository;
+    public EventService(EventRepository eventRepository, VenueService venueService, VenueRepository venueRepository) {
+        this.eventRepository = eventRepository;
+        this.venueService = venueService;
+        this.venueRepository = venueRepository;
     }
 
     public EventResponse create(CreateEventRequest createEventRequest) {
         Event event = new Event(
-                null,
                 createEventRequest.name(),
-                createEventRequest.venueName(),
+                venueService.entityGetById(createEventRequest.venueId()),
                 createEventRequest.startsAt(),
                 createEventRequest.capacity(),
                 createEventRequest.priceCents());
 
-        return eventToResponse(inMemoryEventRepository.save(event));
+        return eventToResponse(eventRepository.save(event));
     }
 
     public EventResponse getById(Long id) {
-        Event event = inMemoryEventRepository.findById(id)
+        Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(id));
         return eventToResponse(event);
     }
 
     public List<EventResponse> getAll() {
-        return inMemoryEventRepository.findAll().stream()
+        return eventRepository.findAll().stream()
                 .map(this::eventToResponse)
                 .toList();
     }
 
+    @Transactional
     public EventResponse update(Long id, CreateEventRequest createEventRequest) {
-        inMemoryEventRepository.findById(id).orElseThrow(() -> new EventNotFoundException(id)); //check event exists if not throw
-        Event updatedEvent = new Event(
-                id,
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new EventNotFoundException(id));
+        event.update(
                 createEventRequest.name(),
-                createEventRequest.venueName(),
+                venueService.entityGetById(createEventRequest.venueId()),
                 createEventRequest.startsAt(),
                 createEventRequest.capacity(),
-                createEventRequest.priceCents());
-        inMemoryEventRepository.save(updatedEvent);
-        return eventToResponse(updatedEvent);
+                createEventRequest.priceCents()
+        );
+        return eventToResponse(event);
     }
 
     public void deleteById(Long id) {
-        if (!inMemoryEventRepository.deleteById(id)) {
+        if (!eventRepository.existsById(id)) {
             throw new EventNotFoundException(id);
         }
+        eventRepository.deleteById(id);
     }
 
     private EventResponse eventToResponse(Event event) {
         return new EventResponse(
                 event.getId(),
                 event.getName(),
-                event.getVenueName(),
+                event.getVenue().getId(),
                 event.getStartsAt(),
                 event.getCapacity(),
+                event.getRemaining(),
                 event.getPriceCents());
     }
 }

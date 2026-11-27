@@ -1,66 +1,63 @@
-# API  test commands 
+# API examples
 
-## - inMemory data stage
+Numbers use `:=`. Keep `startsAt` in the future.
 
-### Create an event
-```bash
-http POST :8080/api/events name="Dublin Jazz Night" venueName="Vicar Street" startsAt="2027-06-01T19:30:00Z" capacity:=500 priceCents:=2500
+## Setup
+Need a venue first (until venue endpoints exist):
+```sql
+INSERT INTO venues (name, city, latitude, longitude) VALUES ('Croke Park', 'Dublin', 53.3609, -6.2511);
 ```
-Expect 201 with a Location header.
+psql: `docker compose exec postgres psql -U tixdub -d tixdub`
 
-### List events
+## Events
+Create (201 + Location, remaining = capacity)
 ```bash
-http GET :8080/api/events
+http POST :8080/api/events name="Winter Gig" venueId:=1 startsAt="2026-12-20T19:00:00Z" capacity:=100 priceCents:=2500
 ```
-Expect 200 with a list.
-
-### Get an event
+Get one (200)
 ```bash
-http GET :8080/api/events/1
+http :8080/api/events/1
 ```
-Expect 200.
-
-### Update an event
+List (200)
 ```bash
-http PUT :8080/api/events/1 name="Dublin Jazz Night (Updated)" venueName="Vicar Street" startsAt="2027-06-01T20:00:00Z" capacity:=450 priceCents:=3000
+http :8080/api/events
 ```
-Expect 200 with the new values.
-
-### Error: missing fields
+Update (200)
 ```bash
-http POST :8080/api/events name=""
+http PUT :8080/api/events/1 name="Winter Gig" venueId:=1 startsAt="2026-12-20T19:00:00Z" capacity:=150 priceCents:=2500
 ```
-Expect 400 with an errors list.
-
-### Error: wrong values
-```bash
-http POST :8080/api/events name="" venueName="" startsAt="2020-01-01T10:00:00Z" capacity:=-5 priceCents:=-1
-```
-Expect 400 with an errors list sorted by field.
-
-### Error: unreadable body
-```bash
-http POST :8080/api/events name="Jazz" venueName="Vicar Street" startsAt="tomorrow" capacity:=10 priceCents:=0
-```
-Expect 400 "Unable to read request body".
-
-### Error: event not found
-```bash
-http GET :8080/api/events/999
-http PUT :8080/api/events/999 name="X" venueName="Y" startsAt="2027-06-01T20:00:00Z" capacity:=10 priceCents:=0
-http DELETE :8080/api/events/999
-```
-Expect 404 for each.
-
-### Error: invalid update
-```bash
-http PUT :8080/api/events/1 name="" capacity:=-1
-```
-Expect 400 with an errors list.
-
-### Delete an event
+Delete (204, then GET = 404)
 ```bash
 http DELETE :8080/api/events/1
-http GET :8080/api/events/1
 ```
-Expect 204, then 404.
+
+## Errors
+Bad venue (404)
+```bash
+http POST :8080/api/events name="X" venueId:=99 startsAt="2026-12-20T19:00:00Z" capacity:=100 priceCents:=2500
+```
+Missing event (404)
+```bash
+http :8080/api/events/999
+```
+Missing name (400 + errors list)
+```bash
+http POST :8080/api/events venueId:=1 startsAt="2026-12-20T19:00:00Z" capacity:=100 priceCents:=2500
+```
+Bad body (400)
+```bash
+http POST :8080/api/events startsAt="not-a-date"
+```
+Capacity below sold (409). Fake sold tickets first:
+```sql
+UPDATE events SET remaining = 30 WHERE id = 1;
+```
+Then PUT with capacity:=100 (sold = 120). 120 or more works.
+
+## Check DB
+```sql
+SELECT id, name, venue_id, capacity, remaining FROM events;
+```
+
+## Persistence
+Create an event, restart app, list again. Event still there.

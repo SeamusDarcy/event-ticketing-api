@@ -1,21 +1,60 @@
 package com.seamus.eventticketingapi.event;
 
+import com.seamus.eventticketingapi.venue.CapacityTooLowException;
+import com.seamus.eventticketingapi.venue.Venue;
+import jakarta.persistence.*;
+
 import java.time.Instant;
 
+@Entity
+@Table(name = "events")
 public class Event {
-    private final Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
     private String name;
-    private String venueName;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "venue_id")
+    private Venue venue;
+
+    @Column(nullable = false)
     private Instant startsAt;
+
+    @Column(nullable = false)
     private int capacity;
+
+    @Column(nullable = false)
     private long priceCents;
 
-    public Event(Long id, String eventName, String venueName, Instant startsAt, int capacity, long priceCents) {
-        this.id = id;
-        this.name = eventName;
-        this.venueName = venueName;
+    @Column(nullable = false)
+    private int remaining;
+
+    protected Event() {
+    }
+
+    public Event(String name, Venue venue, Instant startsAt, int capacity, long priceCents) {
+        this.name = name;
+        this.venue = venue;
         this.startsAt = startsAt;
         this.capacity = capacity;
+        this.priceCents = priceCents;
+        this.remaining = capacity;
+    }
+
+    public void update(String name, Venue venue, Instant startsAt, int capacity, long priceCents){
+        int newRemaining = this.remaining + (capacity - this.capacity);
+
+        if (newRemaining < 0){
+            throw new CapacityTooLowException(capacity);
+        }
+        this.name = name;
+        this.venue = venue;
+        this.startsAt = startsAt;
+        this.capacity = capacity;
+        this.remaining = newRemaining;
         this.priceCents = priceCents;
     }
 
@@ -27,8 +66,8 @@ public class Event {
         return name;
     }
 
-    public String getVenueName() {
-        return venueName;
+    public Venue getVenue() {
+        return venue;
     }
 
     public Instant getStartsAt() {
@@ -43,23 +82,7 @@ public class Event {
         return priceCents;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setVenueName(String venueName) {
-        this.venueName = venueName;
-    }
-
-    public void setStartsAt(Instant startsAt) {
-        this.startsAt = startsAt;
-    }
-
-    public void setCapacity(int capacity) {
-        this.capacity = capacity;
-    }
-
-    public void setPriceCents(long priceCents) {
-        this.priceCents = priceCents;
+    public int getRemaining() {
+        return remaining;
     }
 }

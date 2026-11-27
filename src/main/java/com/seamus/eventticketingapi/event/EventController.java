@@ -46,7 +46,7 @@ public class EventController {
     @PostMapping
     public ResponseEntity<EventResponse> create(@Valid @RequestBody CreateEventRequest request) {
         EventResponse eventResponse = eventService.create(request);
-        URI location = URI.create("/api/events/" + eventResponse.id());
+        URI location = URI.create("/api/events/" + eventResponse.id()); // builds the url that holds new object to give back to client
         //ResponseEntity.create starts new response with 201, puts location in location header and adds body
         return ResponseEntity.created(location).body(eventResponse);
     }
