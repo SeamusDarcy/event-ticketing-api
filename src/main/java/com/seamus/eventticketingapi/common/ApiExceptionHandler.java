@@ -1,6 +1,8 @@
 package com.seamus.eventticketingapi.common;
 
 import com.seamus.eventticketingapi.event.EventNotFoundException;
+import com.seamus.eventticketingapi.venue.CapacityTooLowException;
+import com.seamus.eventticketingapi.venue.VenueNotFoundException;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -45,6 +47,16 @@ public class ApiExceptionHandler {
     public ProblemDetail handleNotReadable(HttpMessageNotReadableException ex){
         log.warn("Unreadable request body: {}", ex.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Request body error");
+    }
+
+    @ExceptionHandler(VenueNotFoundException.class)
+    public ProblemDetail handleVenueNotFound(VenueNotFoundException ex){
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(CapacityTooLowException.class)
+    public ProblemDetail handleCapacityTooLow(CapacityTooLowException ex){
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     }
 
 }

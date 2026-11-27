@@ -8,5 +8,6 @@ public record EventResponse(
         Long venueId,
         Instant startsAt,
         Integer capacity,
+        Integer remaining,
         Long priceCents) {
 }

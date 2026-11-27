@@ -46,6 +46,7 @@
 - @RequestBody tells Spring to read the JSON in request body and convert it into the parameters type e.g. request record
 - @Valid placed before @RequestBody parameter, it makes Spring check the records constraint (@NotNull) annotation before method runs, failure produces a 400 error and method never called
 - Create in EventController returns a ResponseEntity<EventResponse> which is the staus code (201), the headers (location) and the body (eventResponse). to create the ResponseEntity we create a URI with the location path of new created event
+- URI : builds the address that stores the newly created object to give back to client 
 
 
 ## Instant vs LocalDateTime
@@ -167,9 +168,10 @@
 
 ## @ManyToOne and @JoinColumn: Linking Events to Venues
 - When its calls eventRepository.save(event), Hibernate looks at Event class and sees the venue field
-- from this it knows that the fields type is Venue and Venue has exactly one field marked @Id and @JoinColumn(name = "venue_id") says where to put the number
+- from this it knows that the fields type is Venue and Venue has exactly one field marked @Id and @JoinColumn(name = "venue_id") says to put that value into row called "venue_id"
 - It reads the id field from venue object it got and uses that number for venue_id column 
 - To load and even it does this in reverse 
+- To update the venue_id table in an event -> look up new venue -> set event this.venue to new venue -> when save is called Hibernate will see the event venue is now different and will update the row itself. 
 
 ## Postgres
 - GENERATED ALWAYS AS IDENTITY : makes Postgres give ids in increasing order by itself 
@@ -185,10 +187,19 @@
 ## EventRepository
 - It extends JpaRepository<Event, Long>, Event -> type of object repo will deal with, Long -> Type of the ID (PK) of the object 
 - by extending JpaRepo it already has alot of methods like save, findById, findAll, deleteById, etc. 
+- getById() : returns a Optional<Event> which means we can use .orElseThrow() chained after it which will throw if event is empty 
 
 ## Bean Validation
 - @NotNull : Must not be null. Empty or Blank text still passes, used for numbers, dates, ID's and objects
 - @NotEmpty : Must not be null or empty. Spaces still pass. used for lists, sets, maps, arrays
 - @NotBank : Must not be null, empty or whitespace only. String only used on user typed text like names or titles 
 
+## Event and Venue Service 
+- EventService needs to access the Venue Repository to create an event so its get VenueService injected as a bean rather than accessing Venue Repo by itself. we also must make a entityGetById method in VenueService. 
+- @Transactional : is used on top of the update method -> makes all db work in a method run as one execution, either all works or all fails and gets undone. because of this there is no need for a save() at end of update method. 
+
+## Event Object 
+- Updating Event : instead of setters there is one method called update that will allow updates to existing event objects
+- While updating we use @Transactional and for updating remaining we do the maths in event update method and throw exception if its invalid
+- Note : @Transactional update only works on object all ready created so cant use on a new Event 
 

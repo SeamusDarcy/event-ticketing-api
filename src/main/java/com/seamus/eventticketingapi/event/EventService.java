@@ -2,6 +2,10 @@ package com.seamus.eventticketingapi.event;
 
 import com.seamus.eventticketingapi.event.dto.CreateEventRequest;
 import com.seamus.eventticketingapi.event.dto.EventResponse;
+import com.seamus.eventticketingapi.venue.VenueNotFoundException;
+import com.seamus.eventticketingapi.venue.VenueRepository;
+import com.seamus.eventticketingapi.venue.VenueService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,16 +14,19 @@ import java.util.List;
 @Service
 public class EventService {
     private final EventRepository eventRepository;
+    private final VenueService venueService;
+    private final VenueRepository venueRepository;
 
-    public EventService(EventRepository eventRepository) {
+    public EventService(EventRepository eventRepository, VenueService venueService, VenueRepository venueRepository) {
         this.eventRepository = eventRepository;
+        this.venueService = venueService;
+        this.venueRepository = venueRepository;
     }
 
     public EventResponse create(CreateEventRequest createEventRequest) {
         Event event = new Event(
-                null,
                 createEventRequest.name(),
-                createEventRequest.venueName(),
+                venueService.entityGetById(createEventRequest.venueId()),
                 createEventRequest.startsAt(),
                 createEventRequest.capacity(),
                 createEventRequest.priceCents());
@@ -39,17 +46,18 @@ public class EventService {
                 .toList();
     }
 
+    @Transactional
     public EventResponse update(Long id, CreateEventRequest createEventRequest) {
-        eventRepository.findById(id).orElseThrow(() -> new EventNotFoundException(id)); //check event exists if not throw
-        Event updatedEvent = new Event(
-                id,
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new EventNotFoundException(id));
+        event.update(
                 createEventRequest.name(),
-                createEventRequest.venueName(),
+                venueService.entityGetById(createEventRequest.venueId()),
                 createEventRequest.startsAt(),
                 createEventRequest.capacity(),
-                createEventRequest.priceCents());
-        eventRepository.save(updatedEvent);
-        return eventToResponse(updatedEvent);
+                createEventRequest.priceCents()
+        );
+        return eventToResponse(event);
     }
 
     public void deleteById(Long id) {
@@ -63,9 +71,10 @@ public class EventService {
         return new EventResponse(
                 event.getId(),
                 event.getName(),
-                event.getVenueName(),
+                event.getVenue().getId(),
                 event.getStartsAt(),
                 event.getCapacity(),
+                event.getRemaining(),
                 event.getPriceCents());
     }
 }

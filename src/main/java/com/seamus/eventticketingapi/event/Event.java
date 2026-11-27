@@ -1,5 +1,6 @@
 package com.seamus.eventticketingapi.event;
 
+import com.seamus.eventticketingapi.venue.CapacityTooLowException;
 import com.seamus.eventticketingapi.venue.Venue;
 import jakarta.persistence.*;
 
@@ -41,6 +42,20 @@ public class Event {
         this.capacity = capacity;
         this.priceCents = priceCents;
         this.remaining = capacity;
+    }
+
+    public void update(String name, Venue venue, Instant startsAt, int capacity, long priceCents){
+        int newRemaining = this.remaining + (capacity - this.capacity);
+
+        if (newRemaining < 0){
+            throw new CapacityTooLowException(capacity);
+        }
+        this.name = name;
+        this.venue = venue;
+        this.startsAt = startsAt;
+        this.capacity = capacity;
+        this.remaining = newRemaining;
+        this.priceCents = priceCents;
     }
 
     public Long getId() {
